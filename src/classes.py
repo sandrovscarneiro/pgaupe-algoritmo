@@ -15,6 +15,10 @@ from pymoo.operators.selection.tournament import TournamentSelection
 from pymoo.termination import get_termination
 from pymoo.optimize import minimize
 
+from pymoo.core.callback import Callback
+from IPython.display import clear_output
+import time
+
 class TimetablingProblem(ElementwiseProblem):
   def __init__(self, disciplinas, n_horas_dia, n_dias, professores, turno: str):
     super().__init__(n_var = len(disciplinas) * n_horas_dia * n_dias, n_obj = 1, n_constr = 7, xl = 1, xu = n_horas_dia*n_dias, vtype=int)
@@ -471,3 +475,25 @@ class SwapMutation(Mutation):
 
       X[i] = matrix.flatten()
     return X
+
+class ColabCallback(Callback):
+    def __init__(self):
+        super().__init__()
+        self.start_time = time.time()
+
+    def notify(self, algorithm):
+        tempo_decorrido = time.time() - self.start_time
+        geracao_atual = algorithm.n_gen
+
+        # Limpa a saída da célula antes de imprimir o novo valor
+        clear_output(wait=True)
+
+        # Mostra o status atualizado no mesmo lugar
+        print("=========================================")
+        print(f"🧬 Geração Atual: {geracao_atual}")
+        print(f"⏱️ Tempo Decorrido: {tempo_decorrido:.2f} segundos")
+        print(f"🚀 Média: {tempo_decorrido/max(1, geracao_atual):.3f}s por geração")
+        print("=========================================")
+
+# No seu minimize:
+# res = minimize(problem, algorithm, termination, callback=ColabCallback(), verbose=False)
